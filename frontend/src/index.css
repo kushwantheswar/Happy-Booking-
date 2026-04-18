@@ -1,8 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --color-primary: #E50914;
+  --color-primary-hover: #C10712;
+  --color-dark-900: #000000;
+  --color-dark-800: #141414;
+  --color-dark-700: #232323;
+  --color-dark-600: #333333;
+  
+  --font-sans: "Inter", "system-ui", "sans-serif";
+}
 
 @layer base {
   body {
@@ -38,9 +45,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-dark-900;
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-dark-700 rounded-full hover:bg-dark-600;
+  background: #333333;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #232323;
 }
