@@ -27,7 +27,14 @@ const Register = () => {
       await register(formData);
       navigate('/');
     } catch (err) {
-      setError(Object.values(err.response?.data || {}).flat()[0] || 'Registration failed');
+      const serverErrors = err.response?.data?.errors;
+      if (serverErrors) {
+        // Show first field error
+        const firstError = Object.values(serverErrors)[0];
+        setError(firstError);
+      } else {
+        setError(err.response?.data?.error || 'Registration failed');
+      }
     } finally {
       setLoading(false);
     }
