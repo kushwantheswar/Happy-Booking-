@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-"""
-Seed script – creates admin user + sample data.
-Run: python seed.py
-"""
+# Seed script - creates admin user + sample data.
+# Run: python seed.py
 import os
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -11,18 +8,18 @@ django.setup()
 from django.utils import timezone
 from api.models import User, Movie, Theater, Screen, Show
 
-# ── Admin user ──
+# -- Admin user --
 if not User.objects.filter(email='admin@happybooking.com').exists():
     User.objects.create_superuser(
         email='admin@happybooking.com',
         username='admin',
         password='admin123',
     )
-    print('✓ Admin created  →  admin@happybooking.com / admin123')
+    print('Admin created -> admin@happybooking.com / admin123')
 else:
-    print('  Admin already exists')
+    print('Admin already exists')
 
-# ── Sample movies ──
+# -- Sample movies --
 movies_data = [
     dict(title='Kalki 2898 AD', description='A sci-fi epic set in the future of India, blending mythology and technology.', duration=181, language='Telugu', genre='Sci-Fi', release_date='2024-06-27', rating=8.2),
     dict(title='Fighter', description='The story of India\'s top air warriors and their quest for a victory.', duration=166, language='Hindi', genre='Action', release_date='2024-01-25', rating=7.4),
@@ -37,9 +34,9 @@ for m in movies_data:
     movie, created = Movie.objects.get_or_create(title=m['title'], defaults=m)
     created_movies.append(movie)
     if created:
-        print(f'✓ Movie: {movie.title}')
+        print(f'Movie: {movie.title}')
 
-# ── Theater ──
+# -- Theater --
 theater, _ = Theater.objects.get_or_create(
     name='PVR Cinemas',
     defaults=dict(location='Connaught Place', city='New Delhi', total_screens=5)
@@ -48,15 +45,15 @@ theater2, _ = Theater.objects.get_or_create(
     name='INOX Multiplex',
     defaults=dict(location='Phoenix Mall', city='Mumbai', total_screens=4)
 )
-print('✓ Theaters ready')
+print('Theaters ready')
 
-# ── Screens ──
+# -- Screens --
 screen1, _ = Screen.objects.get_or_create(theater=theater, name='Audi 1', defaults={'total_seats': 100})
 screen2, _ = Screen.objects.get_or_create(theater=theater, name='Audi 2', defaults={'total_seats': 80})
 screen3, _ = Screen.objects.get_or_create(theater=theater2, name='Screen A', defaults={'total_seats': 120})
-print('✓ Screens ready')
+print('Screens ready')
 
-# ── Shows ──
+# -- Shows --
 from datetime import datetime, timedelta
 
 def make_show(movie, screen, hour_offset, price):
@@ -74,7 +71,7 @@ def make_show(movie, screen, hour_offset, price):
             Seat(show=show, row=r, number=n)
             for r in rows for n in range(1, seats_per_row+1)
         ])
-        print(f'  ✓ Show: {movie.title} @ {start.strftime("%H:%M")}')
+        print(f'Show: {movie.title} @ {start.strftime("%H:%M")}')
 
 make_show(created_movies[0], screen1, 10, 250)
 make_show(created_movies[0], screen1, 14, 280)
@@ -86,4 +83,4 @@ make_show(created_movies[3], screen1, 15, 270)
 make_show(created_movies[4], screen2, 19, 350)
 make_show(created_movies[5], screen3, 12, 180)
 
-print('\n🎬 Seed complete! Login: admin@happybooking.com / admin123')
+print('\nSeed complete! Login: admin@happybooking.com / admin123')
