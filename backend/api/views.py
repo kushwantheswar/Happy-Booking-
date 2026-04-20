@@ -51,26 +51,43 @@ def register(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
-    from django.contrib.auth import get_user_model
+    from django.contrib.auth import get_user_model, authenticate
     User = get_user_model()
     email = request.data.get('email', '').strip().lower()
     password = request.data.get('password', '')
 
+    print(f"Login attempt for: {email}")
+
     if not email or not password:
         return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        user = User.objects.get(email=email)
-        if user.check_password(password):
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                'user': UserSerializer(user).data,
-                'access': str(refresh.access_token),
-                'refresh': str(refresh),
-            })
-    except User.DoesNotExist:
-        pass
+    user = authenticate(request, username=email, password=password)
+    
+    if user is not None:
+        print(f"Login success for: {email}")
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'user': UserSerializer(user).data,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        })
+    else:
+        # Fallback manual check for super-users or custom cases
+        try:
+            u = User.objects.get(email=email)
+            if u.check_password(password):
+                print(f"Manual check success for: {email}")
+                refresh = RefreshToken.for_user(u)
+                return Response({
+                    'user': UserSerializer(u).data,
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh),
+                })
+        except User.DoesNotExist:
+            print(f"User not found: {email}")
+            pass
 
+    print(f"Login failed for: {email}")
     return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
