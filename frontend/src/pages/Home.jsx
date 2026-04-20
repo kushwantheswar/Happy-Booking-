@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { Play, Star, Calendar, Clock } from 'lucide-react';
+import { Play, Star, Calendar, Clock, Ticket } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Home = () => {
