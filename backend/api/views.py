@@ -53,41 +53,37 @@ def register(request):
 def login(request):
     from django.contrib.auth import get_user_model, authenticate
     User = get_user_model()
-    email = request.data.get('email', '').strip().lower()
+    
+    # Try to get identifier as either 'email' or 'username'
+    identifier = (request.data.get('email') or request.data.get('username') or '').strip().lower()
     password = request.data.get('password', '')
 
-    print(f"Login attempt for: {email}")
-
-    if not email or not password:
-        return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
-
-    user = authenticate(request, username=email, password=password)
+    print(f"--- Login Attempt ---")
+    print(f"Identifier: {identifier}")
     
-    if user is not None:
-        print(f"Login success for: {email}")
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'user': UserSerializer(user).data,
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-        })
-    else:
-        # Fallback manual check for super-users or custom cases
-        try:
-            u = User.objects.get(email=email)
-            if u.check_password(password):
-                print(f"Manual check success for: {email}")
-                refresh = RefreshToken.for_user(u)
-                return Response({
-                    'user': UserSerializer(u).data,
-                    'access': str(refresh.access_token),
-                    'refresh': str(refresh),
-                })
-        except User.DoesNotExist:
-            print(f"User not found: {email}")
-            pass
+    if not identifier or not password:
+        return Response({'error': 'Credentials required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    print(f"Login failed for: {email}")
+    # Try finding user by email first, then username
+    user_obj = User.objects.filter(email=identifier).first()
+    if not user_obj:
+        user_obj = User.objects.filter(username=identifier).first()
+
+    if user_obj:
+        print(f"Found user: {user_obj.email}")
+        if user_obj.check_password(password):
+            print("Password matches!")
+            refresh = RefreshToken.for_user(user_obj)
+            return Response({
+                'user': UserSerializer(user_obj).data,
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            })
+        else:
+            print("Password DOES NOT match.")
+    else:
+        print("User not found in database.")
+
     return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
