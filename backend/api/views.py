@@ -448,5 +448,24 @@ def admin_bookings(request):
     return Response(BookingSerializer(bookings, many=True, context={'request': request}).data)
 
 
-# Import models for aggregate
-from django.db import models
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    from django.db import connection
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    db_ok = False
+    try:
+        connection.ensure_connection()
+        db_ok = True
+    except:
+        pass
+        
+    return Response({
+        'status': 'Backend is LIVE',
+        'database': 'Connected' if db_ok else 'Error',
+        'user_count': User.objects.count(),
+        'movies_count': Movie.objects.count(),
+        'time': timezone.now()
+    })

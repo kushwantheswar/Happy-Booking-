@@ -38,4 +38,5 @@ urlpatterns = [
     # Admin
     path('admin/stats/', views.admin_stats, name='admin_stats'),
     path('admin/bookings/', views.admin_bookings, name='admin_bookings'),
+    path('health/', views.health_check, name='health_check'),
 ]
